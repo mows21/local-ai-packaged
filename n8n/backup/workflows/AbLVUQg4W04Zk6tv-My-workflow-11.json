@@ -1,0 +1,80 @@
+{
+  "name": "My workflow 11",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-get-workflow",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        260,
+        80
+      ],
+      "id": "b8cc4ed5-0d04-4658-b03d-1bbae954662c",
+      "webhookId": "4dd57ef4-4a0a-4d94-ab3a-f112e058b4c4"
+    },
+    {
+      "parameters": {
+        "functionCode": "const { workflowId } = $json.body;\nreturn [{ json: { workflowId } }];"
+      },
+      "name": "Extract ID",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        460,
+        80
+      ],
+      "id": "421187b8-cef1-49cf-b913-f4fcd6f3b3c6"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "workflowId": "={{ $json.workflowId }}",
+        "requestOptions": {}
+      },
+      "name": "Get Workflow",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        660,
+        80
+      ],
+      "id": "3a6d7a99-2fb2-4bd6-ae75-bc4d77890c38"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract ID": {
+      "main": [
+        [
+          {
+            "node": "Get Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": null
+}

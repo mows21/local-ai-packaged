@@ -16,7 +16,7 @@ x-n8n: &service-n8n
   image: n8nio/n8n:latest
   environment:
     - DB_TYPE=postgresdb
-    - DB_POSTGRESDB_HOST=db
+    - DB_POSTGRESDB_HOST=postgres
     - DB_POSTGRESDB_USER=postgres
     - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
     - DB_POSTGRESDB_DATABASE=postgres
@@ -77,29 +77,45 @@ services:
     volumes:
       - open-webui:/app/backend/data
 
-  n8n-import:
-    <<: *service-n8n
-    container_name: n8n-import
-    entrypoint: /bin/sh
-    command:
-      - "-c"
-      - "n8n import:credentials --separate --input=/backup/credentials && n8n import:workflow --separate --input=/backup/workflows"
-    volumes:
-      - ./n8n/backup:/backup  
-
   n8n:
     <<: *service-n8n
     container_name: n8n
     restart: unless-stopped
-    ports:
-      - 5678:5678
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_POSTGRESDB_DATABASE=postgres
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_PERSONALIZATION_ENABLED=false
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_USER_MANAGEMENT_JWT_SECRET}
+      - WEBHOOK_URL=${N8N_HOSTNAME:+https://}${N8N_HOSTNAME:-http://localhost:5678}
     volumes:
       - n8n_storage:/home/node/.n8n
       - ./n8n/backup:/backup
       - ./shared:/data/shared
     depends_on:
-      n8n-import:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:${POSTGRES_VERSION:-latest}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+    ports:
+      - 127.0.0.1:5433:5432
+    volumes:
+      - langfuse_postgres_data:/var/lib/postgresql/data
 
   qdrant:
     image: qdrant/qdrant
@@ -109,6 +125,20 @@ services:
       - 6333:6333
     volumes:
       - qdrant_storage:/qdrant/storage
+
+  app:
+    image: your/app-image # <-- Replace with your app image
+    container_name: app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    # Add volumes or env as needed
+
+  landing:
+    image: your/landing-image # <-- Replace with your landing page image
+    container_name: landing
+    restart: unless-stopped
+    # Add volumes or env as needed
 
   caddy:
     container_name: caddy
@@ -120,14 +150,14 @@ services:
       - caddy-data:/data:rw
       - caddy-config:/config:rw
     environment:
-      - N8N_HOSTNAME=${N8N_HOSTNAME:-":8001"}
-      - WEBUI_HOSTNAME=${WEBUI_HOSTNAME:-":8002"}
-      - FLOWISE_HOSTNAME=${FLOWISE_HOSTNAME:-":8003"}
-      - OLLAMA_HOSTNAME=${OLLAMA_HOSTNAME:-":8004"}
-      - SUPABASE_HOSTNAME=${SUPABASE_HOSTNAME:-":8005"}
-      - SEARXNG_HOSTNAME=${SEARXNG_HOSTNAME:-":8006"}
-      - LANGFUSE_HOSTNAME=${LANGFUSE_HOSTNAME:-":8007"}
-      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-internal}
+      - N8N_HOSTNAME=${N8N_HOSTNAME}
+      - WEBUI_HOSTNAME=${WEBUI_HOSTNAME}
+      - FLOWISE_HOSTNAME=${FLOWISE_HOSTNAME}
+      - OLLAMA_HOSTNAME=${OLLAMA_HOSTNAME}
+      - SUPABASE_HOSTNAME=${SUPABASE_HOSTNAME}
+      - SEARXNG_HOSTNAME=${SEARXNG_HOSTNAME}
+      - LANGFUSE_HOSTNAME=${LANGFUSE_HOSTNAME}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     cap_drop:
       - ALL
     cap_add:
@@ -258,23 +288,6 @@ services:
       retries: 5
       start_period: 1s
 
-  postgres:
-    image: postgres:${POSTGRES_VERSION:-latest}
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: postgres
-    ports:
-      - 127.0.0.1:5433:5432
-    volumes:
-      - langfuse_postgres_data:/var/lib/postgresql/data              
-
   redis:
     container_name: redis
     image: docker.io/valkey/valkey:8-alpine
@@ -303,8 +316,6 @@ services:
     container_name: searxng
     image: docker.io/searxng/searxng:latest
     restart: unless-stopped
-    ports:
-      - 8080:8080
     volumes:
       - ./searxng:/etc/searxng:rw
     environment:
@@ -322,6 +333,17 @@ services:
       options:
         max-size: "1m"
         max-file: "1"      
+
+  ollama:
+    <<: *service-ollama
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - 11434:11434
+    environment:
+      - OLLAMA_CONTEXT_LENGTH=8192
+    volumes:
+      - ollama_storage:/root/.ollama
 
   ollama-cpu:
     profiles: ["cpu"]

@@ -1,0 +1,1672 @@
+{
+  "name": "Build your own Qdrant Vector Store MCP server",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 1. Set up an MCP Server Trigger\n[Read more about the MCP Server Trigger](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-langchain.mcptrigger)",
+        "height": 660,
+        "width": 680,
+        "color": 7
+      },
+      "id": "49620d3a-d4ec-4017-ade1-ff2ef5473c11",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        900
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "insert_review",
+        "description": "=Call this tool to insert a customer's review into our review database.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "value": {
+            "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('text', `The contents of the review`, 'string') }}",
+            "text2": "null",
+            "operation": "insert",
+            "companyIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('companyIds', `The company ID is their url address.`, 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "operation",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "operation",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text2",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text2",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyIds",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "companyIds",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "f0646a81-d328-4f07-a744-60f576b5a51e",
+      "name": "Insert",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        1060,
+        1360
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "name": "search_reviews",
+        "description": "Call this tool to search our reviews database.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}",
+          "cachedResultName": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "value": {
+            "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('text', `the query or search terms to use`, 'string') }}",
+            "text2": "null",
+            "operation": "search",
+            "companyIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('companyIds', `Optional, leave blank to search over all companies otherwise one or more company IDs comma-delimited. The company ID is their url address.`, 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "operation",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "operation",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text2",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text2",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyIds",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "companyIds",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "21e8beac-dbd5-44d7-8472-4edff3f63308",
+      "name": "Search",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        1180,
+        1420
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "name": "recommend_reviews",
+        "description": "Call this tool to generate a recommendation for a review based on positive and/or negative preferences.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "value": {
+            "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('text', `preferences to include.`, 'string') }}",
+            "text2": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('text2', `preference to avoid.`, 'string') }}",
+            "operation": "recommend",
+            "companyIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('companyIds', `Optional, leave blank to search across all reviews otherwise one or more company IDs, comma-delimited. The company ID is their url address.`, 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "operation",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "operation",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text2",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text2",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyIds",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "companyIds",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "ffb100a4-9108-4ccd-a897-e5cd9e752232",
+      "name": "Recommend",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        1380,
+        1220
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "path": "a1aff1b5-e5c7-4ca2-91eb-017c1fe32dab"
+      },
+      "id": "d1d53cbc-0a22-409d-9336-d8c98eeaa170",
+      "name": "Qdrant MCP Server",
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "position": [
+        1060,
+        1040
+      ],
+      "webhookId": "a1aff1b5-e5c7-4ca2-91eb-017c1fe32dab",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "operation"
+            },
+            {
+              "name": "text"
+            },
+            {
+              "name": "text2"
+            },
+            {
+              "name": "companyIds"
+            }
+          ]
+        }
+      },
+      "id": "82d747a5-ff5f-44ff-9f68-cc1aa01ba1de",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1640,
+        1260
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "fe782b0f-f501-4985-a9d2-f63f4019177f",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "listCompanies"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "listCompanies"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "81b134bc-d671-4493-b3ad-8df9be3f49a6",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "insert"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "insert"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "8d57914f-6587-4fb3-88e0-aa1de6ba56c1",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "search"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "search"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "7c38f238-213a-46ec-aefe-22e0bcb8dffc",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "compare"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "compare"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "2c691501-786a-433f-a185-3a6e0d08d336",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "recommend"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "recommend"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c7a2e948-5cd5-4545-a633-c1157e63edec",
+      "name": "Operation",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        1860,
+        1220
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "content": "## 2. Expand Functionality Beyond Vendor Implementation\n[Read more about the Qdrant Node](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.vectorstoreqdrant)\n\nWhilst it may be easier to just let the Agent provide the full raw SQL statement,\nit may expose you or your organisation to a real security risk where in the worst\ncase, data may be unknowingly leaked or deleted.\n\nForcing the agent to provide only the parameters of the query\nmeans we can guard somewhat against this risk and also allows\nuse of query parameters as best practice against SQL injection attacks.\n",
+        "height": 320,
+        "width": 580,
+        "color": 7
+      },
+      "id": "18d805db-376c-4583-963a-db1e5d09aa50",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1580,
+        900
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "compare_reviews",
+        "description": "Call this tool to compare search results across 2 or more companies.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}",
+          "cachedResultName": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "value": {
+            "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('text', `the query or search terms to use`, 'string') }}",
+            "text2": "null",
+            "operation": "compare",
+            "companyIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('companyIds', `Two or more company IDs, comma-delimited. The company ID is their url address.`, 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "operation",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "operation",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text2",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text2",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyIds",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "companyIds",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "ab8aeea3-0564-4c96-a67c-ff319df3297b",
+      "name": "Compare",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        1320,
+        1360
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### 🚨Configure Your Qdrant Connection\n* Be sure to enter your endpoint address",
+        "height": 332.38559808882246,
+        "width": 213.30551928619226
+      },
+      "id": "4f0876cb-dc07-486e-937b-334fa2cb754f",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3020,
+        1840
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://qdrant:6333/collections/trustpilot_reviews/points/recommend",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "strategy",
+              "value": "average_vector"
+            },
+            {
+              "name": "limit",
+              "value": "={{ 3 }}"
+            },
+            {
+              "name": "positive",
+              "value": "={{ [$json.embeddings[0]] }}"
+            },
+            {
+              "name": "negative",
+              "value": "={{ [$json.embeddings[1]] }}"
+            },
+            {
+              "name": "filter",
+              "value": "={{\n$('Operation').first().json.companyIds\n  ? {\n    \"must\": {\n      \"key\": \"metadata.company_id\",\n      \"match\": {\n        \"any\": $('Operation').first().json.companyIds.split(',')\n      }\n    }\n  }\n  : {}\n}}"
+            },
+            {
+              "name": "with_payload",
+              "value": "={{ true }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "02031bac-016f-4715-8413-6255cf73e103",
+      "name": "Recommend API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3080,
+        1880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "name": "model",
+              "value": "text-embedding-3-small"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9d058dae-2f24-4e34-bdb6-ba5649a3b431",
+      "name": "Get Embeddings",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2680,
+        1880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { text: $input.first().json.text },\n  { text: $input.first().json.text2 }\n]"
+      },
+      "id": "dfbb9a02-91dd-4dc4-8738-0aff41db2156",
+      "name": "Preferences to Items",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2480,
+        1880
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "data[0].embedding",
+              "renameField": true,
+              "outputFieldName": "embeddings"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7d6bda64-4f98-43d1-b181-343238f678bb",
+      "name": "Aggregate Embeddings",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        2880,
+        1880
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "name": "model",
+              "value": "text-embedding-3-small"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8eacac44-9cfd-4aa0-be7d-534ae630a2d4",
+      "name": "Get Embeddings1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2480,
+        1540
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "data[0].embedding",
+              "renameField": true,
+              "outputFieldName": "embeddings"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5b23221c-aeb8-4a4f-b33b-75d46ba7a4fd",
+      "name": "Aggregate Embeddings1",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        2680,
+        1540
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://qdrant:6333/collections/trustpilot_reviews/points/search/groups",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"vector\": $json.embeddings[0],\n  \"group_by\": \"metadata.company_id\",\n  \"limit\": 10,\n  \"group_size\": 3,\n  \"with_payload\": true\n}\n}}",
+        "options": {}
+      },
+      "id": "bbbfaf2f-8294-401f-9f01-efeb58e99f15",
+      "name": "Group Search API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2880,
+        1540
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a83c0c10-74a7-4a52-b6c4-26dc8313023b",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bbed1c97-eebb-47f1-9486-73bade35d290",
+      "name": "Has Results?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3700,
+        1540
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "caf5bf23-087a-496f-8d20-56ab70e303a8",
+              "name": "category",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "db3c2c92-b951-4365-9c19-d5d0f8654a42",
+              "name": "results",
+              "type": "array",
+              "value": "={{\n$json.hits?.map(hit => ({\n  content: hit.payload.content,\n  metadata: hit.payload.metadata\n}))\n}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e995b27a-f331-434c-a828-bc02f978b43c",
+      "name": "Simplify Group Results",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3280,
+        1540
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "24ab771e-0e19-4bfe-bfee-2fed3a34f7fe",
+              "name": "response",
+              "type": "string",
+              "value": "no results."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e0c327a5-ab2e-46ad-9d4b-0fe8cdd1605c",
+      "name": "Empty Compare Response",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3920,
+        1640
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "response",
+        "options": {}
+      },
+      "id": "52890718-81b4-4880-9a12-b8456e96ad98",
+      "name": "Aggregate Compare Response",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        3920,
+        1420
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "bb87afe4-6910-4c79-9371-d49e77134ac3",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        2440,
+        940
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.text }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "company_id",
+                "value": "={{ $json.companyIds ?? 'unspecified' }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "ba6e426b-9629-445f-b96c-b8b51fcafe3d",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        2560,
+        940
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 3000,
+        "options": {}
+      },
+      "id": "de9e7ffa-49e8-40de-acef-fd92216ec10c",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        2660,
+        1060
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "56f12f89-75dc-4143-ae32-45f1561da19d",
+              "name": "content",
+              "type": "string",
+              "value": "={{ $json.result[0].payload.content }}"
+            },
+            {
+              "id": "57afc394-3793-4605-a751-8c0d446857e7",
+              "name": "metadata",
+              "type": "object",
+              "value": "={{ $json.result[0].payload.metadata }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9d639f7f-5c3e-478f-ba6f-70b2e06394de",
+      "name": "Simplify Recommend Response",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3280,
+        1880
+      ],
+      "typeVersion": 3.4,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cb612470-0d50-4179-a9af-144e592369a8",
+              "name": "response",
+              "type": "string",
+              "value": "ok"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "736d02f1-8658-4d84-bdc6-3f43ad712a76",
+      "name": "Get Insert Response",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2880,
+        780
+      ],
+      "executeOnce": true,
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "response",
+        "options": {}
+      },
+      "id": "2a557659-8668-4dba-b3a7-2bc18981ca10",
+      "name": "Get Search Response",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        2880,
+        1220
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### 🚨Configure Your Qdrant Connection\n* Be sure to enter your endpoint address",
+        "height": 332.38559808882246,
+        "width": 213.30551928619226
+      },
+      "id": "017f0628-f08f-4d7c-b3da-83ada24bcfad",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2820,
+        1480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "trustpilot_reviews",
+          "cachedResultName": "trustpilot_reviews"
+        },
+        "options": {}
+      },
+      "id": "cbbc7999-e2c4-4d84-9c21-7ce47a70ef2d",
+      "name": "Insert Reviews",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "position": [
+        2480,
+        780
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "trustpilot_reviews",
+          "cachedResultName": "trustpilot_reviews"
+        },
+        "prompt": "={{ $json.text }}",
+        "topK": 10,
+        "options": {
+          "searchFilterJson": "={{\n$json.companyIds\n  ? {\n    \"must\": [\n      {\n        \"key\": \"metadata.company_id\",\n        \"match\": {\n          \"any\": $json.companyIds.split(',')\n        }\n      }\n    ]\n  }\n  : {}\n}}"
+        }
+      },
+      "id": "268dd3b8-631e-498c-8c50-33e61244ef7a",
+      "name": "Search Reviews",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "position": [
+        2480,
+        1220
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "result.groups",
+        "options": {}
+      },
+      "id": "45ff74b6-0e9e-4698-98b9-e778f1605df2",
+      "name": "Split Out Companies",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        3080,
+        1540
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "6b6fac92-c001-4070-b8ed-0c63ef54d293",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{\n$('Operation').item.json.companyIds\n  ? $('Operation').item.json.companyIds.split(',').includes($json.id)\n  : true\n}}",
+              "rightValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1856fa8e-f184-4cef-b66f-6254e3f323ac",
+      "name": "Filter By CompanyId",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        3480,
+        1540
+      ],
+      "typeVersion": 2.2,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "response",
+        "options": {}
+      },
+      "id": "3c468d41-9462-4ee0-b9c8-97e8213c0f32",
+      "name": "Aggregate Recommend Response",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        3700,
+        1760
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a83c0c10-74a7-4a52-b6c4-26dc8313023b",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "825ee679-b0bd-4b7a-8684-4a1f7959926e",
+      "name": "Has Results?1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3480,
+        1880
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "24ab771e-0e19-4bfe-bfee-2fed3a34f7fe",
+              "name": "response",
+              "type": "string",
+              "value": "no results."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bfa17c34-7f84-40e2-8c9b-f92c0475fa05",
+      "name": "Empty Compare Response1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3700,
+        1980
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "93860126-eb7a-40b1-8a4e-1824d0aebe01",
+      "name": "Embeddings OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        2580,
+        1380
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "name": "listAvailableCompanies",
+        "description": "Call this tool to list all available companies in the reviews database.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "value": {
+            "text": "null",
+            "text2": "null",
+            "operation": "listCompanies",
+            "companyIds": "null"
+          },
+          "schema": [
+            {
+              "id": "operation",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "operation",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text2",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "text2",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyIds",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "companyIds",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "c3d89756-9073-4640-88ba-eb2c5cf370a1",
+      "name": "ListCompanies",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        980,
+        1220
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://qdrant:6333/collections/trustpilot_reviews/facet",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"key\": \"metadata.company_id\"\n}",
+        "options": {}
+      },
+      "id": "d9a02360-f9aa-4aea-b26f-f3482f55fc18",
+      "name": "List by Facet API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2480,
+        540
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "## Try It Out!\n### This n8n demonstrates how to build your own Qdrant MCP server to extend its functionality beyond that of the official implementation.\n\nThis n8n implementation exposes other cool API features from Qdrant such as facet search, grouped search and recommendations APIs. With this, we can build an easily customisable and maintainable Qdrant MCP server for business intelligence.\n\nThis MCP example is based off an official MCP reference implementation which can be found here -https://github.com/qdrant/mcp-server-qdrant/\n\n### How it works\n* A MCP server trigger is used and connected to 5 custom workflow tools. We're using custom workflow tools as there is quite a few nodes required for each task.\n* We use a mix of n8n supported Qdrant nodes for simple operations such as insert documents and similarity search, and HTTP node to hit the Qdrant API directly for Facet search, group search and recommendations.\n* We use \"Edit Field\" and \"Aggregate\" nodes to return suitable responses to the MCP client.\n\n### How to use\n* This Qdrant MCP server allows any compatible MCP client to manage a Qdrant Collection by supporting select and create operations. You will need to have a collection available before you can use this server. Use the Prerequisite manual steps to get started!\n* Connect your MCP client by following the n8n guidelines here - https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-langchain.mcptrigger/#integrating-with-claude-desktop\n* Try the following queries in your MCP client:\n  * \"Can you help me list the available companies in the collection?\"\n  * \"What do customers say about product deliveries from company X?\"\n  * \"What do customers of company X and company Y say about product ease of use?\"\n\n### Requirements\n* Qdrant for vector store. This can be an a cloud-hosted instance or one you can self-host internally.\n* MCP Client or Agent for usage such as Claude Desktop - https://claude.ai/download\n\n### Customising this workflow\n* Depending on what queries you'll receive, adjust the tool inputs to make it easier for the agent to set the right parameters.\n* Not interested in Reviews? The techniques shared in this template can be used for other types of collections.\n* Remember to set the MCP server to require credentials before going to production and sharing this MCP server with others!",
+        "height": 1320,
+        "width": 440
+      },
+      "id": "6822aee2-7dfe-43ea-8238-ea0a3c8f0188",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "http://qdrant:6333/collections/trustpilot_reviews/index",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"field_name\": \"metadata.company_id\",\n  \"field_schema\": \"keyword\"\n}",
+        "options": {}
+      },
+      "id": "f0b1f04f-b3bd-4ad0-b128-17a96cf52b81",
+      "name": "Create Facet Index",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1360,
+        400
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "http://qdrant:6333/collections/trustpilot_reviews",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"vectors\": {\n    \"distance\": \"Cosine\",\n    \"size\": 1536\n  }\n}",
+        "options": {}
+      },
+      "id": "481c298b-c9e7-412e-aaa0-2e1565fabda8",
+      "name": "Create Collection",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1160,
+        400
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "## Prerequisite: Setup Qdrant Collection\nIf you don't have an existing Qdrant Collection, you can use this manual flow to get started.\n1. Creates a collection called \"trustpilot_reviews\"\n2. Creates an index to allow for facet search ie. list of values of a the \"company_id\" metadata key.",
+        "height": 360,
+        "width": 700,
+        "color": 4
+      },
+      "id": "07e1f0f3-6f24-4a67-9b07-75667f496a9a",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "df0dacdb-4238-475b-9d98-ae7ce9e3142d",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        960,
+        400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Always Authenticate Your Server!\nBefore going to production, it's always advised to enable authentication on your MCP server trigger.",
+        "height": 100,
+        "width": 380,
+        "color": 5
+      },
+      "id": "8c0f0e65-82d2-427e-8c6d-2f89bd225f46",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        780
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Insert": {
+      "ai_tool": [
+        [
+          {
+            "node": "Qdrant MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Qdrant MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare": {
+      "ai_tool": [
+        [
+          {
+            "node": "Qdrant MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Operation": {
+      "main": [
+        [
+          {
+            "node": "List by Facet API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Embeddings1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preferences to Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommend": {
+      "ai_tool": [
+        [
+          {
+            "node": "Qdrant MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Results?": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Compare Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Empty Compare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Results?1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Recommend Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Empty Compare Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ListCompanies": {
+      "ai_tool": [
+        [
+          {
+            "node": "Qdrant MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommend API": {
+      "main": [
+        [
+          {
+            "node": "Simplify Recommend Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Embeddings": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Reviews": {
+      "main": [
+        [
+          {
+            "node": "Get Insert Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Reviews": {
+      "main": [
+        [
+          {
+            "node": "Get Search Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Embeddings1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Embeddings1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group Search API": {
+      "main": [
+        [
+          {
+            "node": "Split Out Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Collection": {
+      "main": [
+        [
+          {
+            "node": "Create Facet Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert Reviews",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Search Reviews",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert Reviews",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter By CompanyId": {
+      "main": [
+        [
+          {
+            "node": "Has Results?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Companies": {
+      "main": [
+        [
+          {
+            "node": "Simplify Group Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Embeddings": {
+      "main": [
+        [
+          {
+            "node": "Recommend API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preferences to Items": {
+      "main": [
+        [
+          {
+            "node": "Get Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Embeddings1": {
+      "main": [
+        [
+          {
+            "node": "Group Search API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simplify Group Results": {
+      "main": [
+        [
+          {
+            "node": "Filter By CompanyId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simplify Recommend Response": {
+      "main": [
+        [
+          {
+            "node": "Has Results?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Create Collection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateId": "3636"
+  }
+}

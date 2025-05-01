@@ -1,0 +1,310 @@
+{
+  "name": "My workflow 10",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "workflows/sync",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "name": "Sync API Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        200
+      ],
+      "id": "508882d3-f01f-48d2-8e8c-a5cc44bf55bd",
+      "webhookId": "5e27550d-8733-43ce-91f5-2b874bab03c5"
+    },
+    {
+      "parameters": {
+        "functionCode": "const authHeader = $input.headers.authorization;\nif (!authHeader || !authHeader.startsWith('Bearer ')) {\n  return { valid: false, error: 'Missing or invalid authorization header' };\n}\nconst token = authHeader.substring(7);\nreturn { valid: true, token };"
+      },
+      "name": "Extract JWT",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        200
+      ],
+      "id": "40caea09-8d58-4442-8200-97d9dda8935a"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.valid}}",
+              "value2": "true"
+            }
+          ]
+        }
+      },
+      "name": "Is Auth Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        200
+      ],
+      "id": "ef1d3616-c95f-423f-9b90-fb178afbb734"
+    },
+    {
+      "parameters": {
+        "functionCode": "const body = $node[\"Sync API Webhook\"].json.body || {};\nif (!body.sourceInstanceId || !body.targetInstanceId || !body.workflowId) {\n  return {\n    status: 400,\n    body: {\n      status: \"error\",\n      message: \"Source instance, target instance, and workflow ID are required\"\n    }\n  };\n}\nreturn {\n  sourceInstanceId: body.sourceInstanceId,\n  targetInstanceId: body.targetInstanceId,\n  workflowId: body.workflowId,\n  newName: body.newName || null,\n  activateOnSync: body.activateOnSync === true\n};"
+      },
+      "name": "Process Sync Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "4af6a625-e043-418d-bf7a-f958cc1df8eb"
+    },
+    {
+      "parameters": {
+        "url": "={{$globalData.adminConfig.supabaseUrl}}/rest/v1/n8n_instances?id=eq.{{$json.sourceInstanceId}}&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Get Source Instance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "54062674-98df-48fa-b5d1-bf04f0981076"
+    },
+    {
+      "parameters": {
+        "url": "={{$globalData.adminConfig.supabaseUrl}}/rest/v1/n8n_instances?id=eq.{{$json.targetInstanceId}}&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Get Target Instance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        0,
+        100
+      ],
+      "id": "e9b0f121-618c-4771-917b-258a0d06aa38"
+    },
+    {
+      "parameters": {
+        "url": "={{$globalData.adminConfig.supabaseUrl}}/rest/v1/workflows?id=eq.{{$json.workflowId}}&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Get Workflow Metadata",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        0,
+        200
+      ],
+      "id": "5ef43ef7-5a3e-4090-9e1b-030afe3c4e40"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$node[\"Get Source Instance\"].json.body.length}}",
+              "operation": "larger"
+            },
+            {
+              "value1": "={{$node[\"Get Target Instance\"].json.body.length}}",
+              "operation": "larger"
+            },
+            {
+              "value1": "={{$node[\"Get Workflow Metadata\"].json.body.length}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "name": "All Resources Exist?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        200,
+        100
+      ],
+      "id": "a34e0adf-39ce-421a-88da-f54b4b4764a1"
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"Get Source Instance\"].json.body[0].url}}/workflows/{{$node[\"Get Workflow Metadata\"].json.body[0].n8n_workflow_id}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Fetch Workflow from Source",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        400,
+        100
+      ],
+      "id": "797582c4-eb8a-4c82-a8f0-8a79fc459a65"
+    },
+    {
+      "parameters": {
+        "functionCode": "const sourceWorkflow = $input.body.data;\nconst syncRequest = $node[\"Process Sync Request\"].json;\nif (syncRequest.newName) {\n  sourceWorkflow.name = syncRequest.newName;\n}\nsourceWorkflow.active = syncRequest.activateOnSync;\nreturn { workflowData: sourceWorkflow };"
+      },
+      "name": "Prepare Workflow for Target",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        600,
+        100
+      ],
+      "id": "99ef9968-4081-44b9-8553-a15a7ebe4feb"
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"Get Target Instance\"].json.body[0].url}}/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Create Workflow in Target",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        800,
+        100
+      ],
+      "id": "8815e029-3a3a-422d-9774-88f1d890d44e"
+    },
+    {
+      "parameters": {
+        "functionCode": "const targetWorkflow = $input.body.data;\nconst sourceWorkflow = $node[\"Get Workflow Metadata\"].json.body[0];\nconst targetInstance = $node[\"Get Target Instance\"].json.body[0];\nreturn {\n  data: {\n    instance_id: targetInstance.id,\n    n8n_workflow_id: targetWorkflow.id,\n    name: targetWorkflow.name,\n    description: sourceWorkflow.description || '',\n    is_active: targetWorkflow.active,\n    tags: sourceWorkflow.tags || '[]',\n    created_at: new Date().toISOString(),\n    updated_at: new Date().toISOString(),\n    created_by: \"system\"\n  }\n};"
+      },
+      "name": "Prepare Workflow Metadata",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        100
+      ],
+      "id": "108ae691-9f27-402f-9b52-eb3d0f8f12b5"
+    },
+    {
+      "parameters": {
+        "url": "={{$globalData.adminConfig.supabaseUrl}}/rest/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Store Workflow Metadata",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1200,
+        100
+      ],
+      "id": "858adf07-98dc-41fa-b93e-630a8159429e"
+    },
+    {
+      "parameters": {
+        "functionCode": "return {\n  logData: {\n    action: \"workflow_sync\",\n    resource_type: \"workflow\",\n    resource_id: $node[\"Create Workflow in Target\"].json.body.data.id,\n    details: JSON.stringify({\n      sourceInstance: $node[\"Get Source Instance\"].json.body[0].name,\n      targetInstance: $node[\"Get Target Instance\"].json.body[0].name,\n      sourceWorkflowId: $node[\"Get Workflow Metadata\"].json.body[0].n8n_workflow_id,\n      targetWorkflowId: $node[\"Create Workflow in Target\"].json.body.data.id,\n      workflowName: $node[\"Create Workflow in Target\"].json.body.data.name\n    }),\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Prepare Audit Log",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        100
+      ],
+      "id": "3f63634b-9c0b-4884-8640-90c6b7341bed"
+    },
+    {
+      "parameters": {
+        "url": "={{$globalData.adminConfig.supabaseUrl}}/rest/v1/audit_logs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Create Audit Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1600,
+        100
+      ],
+      "id": "33f06c73-4cc2-43a0-b818-3d8cc3b2581a"
+    },
+    {
+      "parameters": {
+        "functionCode": "return {\n  status: 200,\n  body: {\n    status: \"success\",\n    message: \"Workflow successfully synced to target instance\",\n    data: {\n      sourceInstance: $node[\"Get Source Instance\"].json.body[0].name,\n      targetInstance: $node[\"Get Target Instance\"].json.body[0].name,\n      workflowName: $node[\"Create Workflow in Target\"].json.body.data.name,\n      targetWorkflowId: $node[\"Create Workflow in Target\"].json.body.data.id,\n      active: $node[\"Create Workflow in Target\"].json.body.data.active\n    }\n  }\n};"
+      },
+      "name": "Format Success Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        100
+      ],
+      "id": "d844c4e2-c2a0-4ab4-b22e-ed54f048cf20"
+    },
+    {
+      "parameters": {
+        "functionCode": "return {\n  status: 404,\n  body: {\n    status: \"error\",\n    message: \"One or more required resources not found\",\n    details: {\n      sourceInstanceExists: $node[\"Get Source Instance\"].json.body.length > 0,\n      targetInstanceExists: $node[\"Get Target Instance\"].json.body.length > 0,\n      workflowExists: $node[\"Get Workflow Metadata\"].json.body.length > 0\n    }\n  }\n};"
+      },
+      "name": "Resources Not Found",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        400,
+        200
+      ],
+      "id": "b9df9786-644b-4b8a-ba59-1117d0a72162"
+    },
+    {
+      "parameters": {
+        "functionCode": "return {\n  status: 401,\n  body: {\n    status: \"error\",\n    message: \"Authentication failed\"\n  }\n};"
+      },
+      "name": "Auth Failed Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        300
+      ],
+      "id": "e46b39d0-401c-49b4-9114-9f299ce30b80"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json.body}}",
+        "options": {
+          "responseCode": "={{$json.status}}"
+        }
+      },
+      "name": "Respond to Client",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        200
+      ],
+      "id": "96170a4a-e68d-4817-8baa-30e6938fd847"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": null
+}
